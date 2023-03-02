@@ -1,3 +1,4 @@
+import Util.TimeChecker;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -12,19 +13,25 @@ import java.io.File;
 
 public class IndexMain {
     public static final String INDEX_DIR = "."+File.separator+"data";
+
     public static void main(String[] args) throws Exception {
+        TimeChecker timeChecker = new TimeChecker();
+
         File indexDirectory = new File(IndexMain.INDEX_DIR); // 인덱싱 파일이 저장될 디렉토리 경로
         System.out.println("indexDirectory : "+indexDirectory.getAbsolutePath());
         Directory directory = FSDirectory.open(indexDirectory.toPath());
         IndexWriter indexWriter = new IndexWriter(directory, new IndexWriterConfig(new StandardAnalyzer()));
         long count = 0L;
 
+        timeChecker.setStartTime(System.currentTimeMillis());
+
         do{
             int randomInt = (int)(Math.random()*100);
+            int randomInt2 = (int)(Math.random()*100);
             Term term = new Term("ID", "index_"+count);
             Document document = new Document();
             document.add(new StringField("id", "ID_"+randomInt, Field.Store.YES));
-            document.add(new StringField("name1", "Name1_"+randomInt, Field.Store.YES));
+            document.add(new StringField("name1", "Name1_"+randomInt2, Field.Store.YES));
             document.add(new StringField("name2", "Name2_"+randomInt, Field.Store.YES));
             document.add(new StringField("name3", "Name3_"+randomInt, Field.Store.YES));
             document.add(new StringField("name4", "Name4_"+randomInt, Field.Store.YES));
@@ -38,11 +45,15 @@ public class IndexMain {
             document.add(new LongPoint("age2", randomInt));
             indexWriter.updateDocument(term, document);
             count++;
-            if(count%100==0){
+            if(count%1000000L==0){
                 System.out.println("insert : "+count);
             }
         }while (count<10000000L);
 
         indexWriter.commit();
+
+        timeChecker.setEndTime(System.currentTimeMillis());
+
+        System.out.printf("Execution time in seconds: %.2f sec" , (timeChecker.getCheckTimeDot()));
     }
 }

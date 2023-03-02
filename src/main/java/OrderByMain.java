@@ -21,7 +21,8 @@ public class OrderByMain {
         BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
         //booleanQueryBuilder.add(nameQuery, BooleanClause.Occur.MUST);
         //booleanQueryBuilder.add(ageQuery, BooleanClause.Occur.MUST);
-        TopDocs topDocs = indexSearcher.search(booleanQueryBuilder.build(), 10, new Sort(sf));
+        TopDocs topDocs = indexSearcher.search(booleanQueryBuilder.build(), Integer.MAX_VALUE, new Sort(sf));
+
         System.out.println("count : " + topDocs.totalHits.value);
         long searchCount = topDocs.totalHits.value;
         for (int index = 0; index < searchCount; index++) {
