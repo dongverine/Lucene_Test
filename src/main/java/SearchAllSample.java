@@ -8,26 +8,19 @@ import org.apache.lucene.store.FSDirectory;
 
 import java.io.File;
 
-public class DistinctQuerySample {
+public class SearchAllSample {
     public static void main(String[] args) throws Exception {
         TimeChecker timeChecker = new TimeChecker();
         TimeChecker timeChecker2 = new TimeChecker();
         File indexDirectory = new File(IndexMain.INDEX_DIR); // 인덱싱 파일이 저장될 디렉토리 경로
         Directory directory = FSDirectory.open(indexDirectory.toPath());
         int splitPage = 10000;
-        //IndexReader indexReader = new IndexReader(directory);
 
         IndexSearcher indexSearcher = new IndexSearcher(DirectoryReader.open(directory));
-        TermQuery nameQuery = new TermQuery(new Term("name1", "Name1_22"));
-        //TermQuery nameQuery = new TermQuery(new Term("name1", "Name1_22"));
-        //Query ageQuery = LongPoint.newSetQuery("age", 31);
+        Query query  = new MatchAllDocsQuery();
 
-        BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
-        booleanQueryBuilder.add(nameQuery, BooleanClause.Occur.MUST);
-        //booleanQueryBuilder.add(ageQuery, BooleanClause.Occur.MUST);
         ScoreDoc lastPageDoc = null;
         long docCount = 0;
-        BooleanQuery query = booleanQueryBuilder.build();
         timeChecker.setStartTime();
 
         timeChecker2.setStartTime();
