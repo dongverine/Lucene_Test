@@ -4,6 +4,10 @@ public class TimeChecker {
     private long startTime = 0;
     private long endTime = 0;
 
+    public TimeChecker(){
+        setStartTime();
+    }
+
     public void setEndTime(long endTime) {
         this.endTime = endTime;
     }

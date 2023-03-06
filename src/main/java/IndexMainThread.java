@@ -12,15 +12,14 @@ import org.apache.lucene.store.FSDirectory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class IndexMainThread {
     public static final String INDEX_DIR = "."+File.separator+"data";
 
     public static void main(String[] args) throws Exception {
+        TimeChecker finalTimeChecker = new TimeChecker();
         TimeChecker timeChecker = new TimeChecker();
 
         File indexDirectory = new File(IndexMainThread.INDEX_DIR); // 인덱싱 파일이 저장될 디렉토리 경로
@@ -30,7 +29,19 @@ public class IndexMainThread {
         long count = 0L;
 
         timeChecker.setStartTime(System.currentTimeMillis());
-        ExecutorService service = Executors.newFixedThreadPool(2);
+        finalTimeChecker.setStartTime(System.currentTimeMillis());
+
+        Runtime rt = Runtime.getRuntime();
+        rt.addShutdownHook(
+                new Thread() {
+                    public void run() {
+                        System.out.println("\nShutdown Main...");
+                        finalTimeChecker.setEndTime();
+                        finalTimeChecker.printCheckTime();
+                    }
+                } );
+
+        ExecutorService service = Executors.newFixedThreadPool(4);
 
         do{
             int randomInt = (int)(Math.random()*100);
@@ -41,9 +52,6 @@ public class IndexMainThread {
             if(count%1000000L==0){
                 System.out.println("insert : "+count);
             }
-            if(count>8000000 && count%100L==0){
-                System.out.println(count);
-            }
         }while (count<10000000L);
 
         System.out.println("ThreadPool Shutdown waiting...");
@@ -51,14 +59,26 @@ public class IndexMainThread {
         System.out.println("ThreadPool Shutdown");
 
         indexWriter.commit();
+
+        System.out.println("indexWriter.commit()");
+
         indexWriter.close();
 
-        timeChecker.setEndTime(System.currentTimeMillis());
+        System.out.println("indexWriter.close()");
 
-        System.out.printf("Execution time in seconds: %.2f sec" , (timeChecker.getCheckTimeDot()));
+        timeChecker.setEndTime(System.currentTimeMillis());
+        timeChecker.printCheckTime();
     }
+
+//    @Override
+//    public void finalize() throws Throwable {
+//        super.finalize();
+//        System.out.println("class finalize()");
+//        finalTimeChecker.setEndTime();
+//        finalTimeChecker.printCheckTime();
+//    }
 }
-class InsertThread implements Callable<Boolean>,  Runnable{
+class InsertThread implements Runnable{//,Callable<Boolean>{
     private IndexWriter indexWriter;
     private int randomInt;
     private int randomInt2;
@@ -81,7 +101,7 @@ class InsertThread implements Callable<Boolean>,  Runnable{
     }
 
     //Callable<Boolean>
-    @Override
+    //@Override
     public Boolean call() throws Exception {
         boolean success = true;
         try {
