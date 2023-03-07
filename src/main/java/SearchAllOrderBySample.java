@@ -11,9 +11,10 @@ public class SearchAllOrderBySample {
     public static void main(String[] args) throws Exception {
         TimeChecker timeChecker = new TimeChecker();
         TimeChecker timeChecker2 = new TimeChecker();
+        TimeChecker timeCheckerOrderBy = new TimeChecker();
         File indexDirectory = new File(IndexMain.INDEX_BIG_DIR); // 인덱싱 파일이 저장될 디렉토리 경로
         Directory directory = FSDirectory.open(indexDirectory.toPath());
-        int splitPage = 10000;
+        int splitPage = 1000;
 
         IndexSearcher indexSearcher = new IndexSearcher(DirectoryReader.open(directory));
         Query query  = new MatchAllDocsQuery();
@@ -29,10 +30,12 @@ public class SearchAllOrderBySample {
         System.out.println("getTotalHits : "+totalHitCollector.getTotalHits());
         timeChecker2.printCheckTime();
 
-        SortField sf = new SortField("name1_sort", SortField.Type.STRING_VAL,false);
-        Sort sort = new Sort(sf);
+        SortField sf1 = new SortField("name1_sort", SortField.Type.STRING_VAL,false);
+        SortField sf2 = new SortField("name2_sort", SortField.Type.STRING_VAL,false);
+        Sort sort = new Sort(sf1, sf2);
 
         do{
+            timeCheckerOrderBy.setStartTime();
             TopDocs topDocs = indexSearcher.searchAfter(lastPageDoc, query, splitPage, sort);
             //indexSearcher.search
             //System.out.println("count : " + topDocs.totalHits.value);
@@ -47,8 +50,10 @@ public class SearchAllOrderBySample {
                 Document document = indexSearcher.doc(docId);
                 lastPageDoc = topDocs.scoreDocs[index];
                 docCount++;
-                System.out.println(docCount+" - id["+docId+"] : " + document.get("name1"));
+                System.out.println(docCount+" - id["+docId+"] : " + document.get("name1")+" ,"+ document.get("name2"));
             }
+            timeCheckerOrderBy.setEndTime();
+            timeCheckerOrderBy.printCheckTime();
             if(docLength != splitPage)
                 break;
         }while (true);
