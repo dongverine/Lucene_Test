@@ -7,7 +7,7 @@ import org.apache.lucene.store.FSDirectory;
 
 import java.io.File;
 
-public class OrderByMain {
+public class SearchAllOrderBySample {
     public static void main(String[] args) throws Exception {
         TimeChecker timeChecker = new TimeChecker();
         TimeChecker timeChecker2 = new TimeChecker();
@@ -29,8 +29,13 @@ public class OrderByMain {
         System.out.println("getTotalHits : "+totalHitCollector.getTotalHits());
         timeChecker2.printCheckTime();
 
+        SortField sf = new SortField("name1_sort", SortField.Type.STRING_VAL,false);
+        Sort sort = new Sort(sf);
+
         do{
-            TopDocs topDocs = indexSearcher.searchAfter(lastPageDoc, query, splitPage);
+            TopDocs topDocs = indexSearcher.searchAfter(lastPageDoc, query, splitPage, sort);
+            //indexSearcher.search
+            //System.out.println("count : " + topDocs.totalHits.value);
 
             //검색어 결과가 없을때
             if(topDocs.totalHits.value==0)
@@ -42,8 +47,7 @@ public class OrderByMain {
                 Document document = indexSearcher.doc(docId);
                 lastPageDoc = topDocs.scoreDocs[index];
                 docCount++;
-                if(docCount%100000==0)
-                    System.out.println(docCount+" - id["+docId+"] : " + document.get("id")+", "+document.get("name1"));
+                System.out.println(docCount+" - id["+docId+"] : " + document.get("name1"));
             }
             if(docLength != splitPage)
                 break;

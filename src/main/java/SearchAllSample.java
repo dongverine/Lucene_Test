@@ -12,7 +12,7 @@ public class SearchAllSample {
     public static void main(String[] args) throws Exception {
         TimeChecker timeChecker = new TimeChecker();
         TimeChecker timeChecker2 = new TimeChecker();
-        File indexDirectory = new File(IndexMain.INDEX_DIR); // 인덱싱 파일이 저장될 디렉토리 경로
+        File indexDirectory = new File(IndexMain.INDEX_BIG_DIR); // 인덱싱 파일이 저장될 디렉토리 경로
         Directory directory = FSDirectory.open(indexDirectory.toPath());
         int splitPage = 10000;
 
@@ -45,7 +45,7 @@ public class SearchAllSample {
                 Document document = indexSearcher.doc(docId);
                 lastPageDoc = topDocs.scoreDocs[index];
                 docCount++;
-                System.out.println(docCount+" - id["+docId+"] : " + document.get("id")+", "+document.get("name1"));
+                System.out.println(docCount+" - id["+docId+"] : " + document.get("name1"));
             }
             if(docLength != splitPage)
                 break;
